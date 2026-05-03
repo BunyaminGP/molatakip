@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MolaTakip — Mağaza Mola Yönetimi</title>
+  <meta name="description" content="Perakende mağazanızda çalışan molalarını kolayca yönetin. MolaTakip ile mola planlama, takip ve analizleri tek uygulamada." />
+  <style>
+    :root {
+      --primary:   #1A2744;
+      --accent:    #3B6FD4;
+      --light:     #EEF2FF;
+      --success:   #27ae60;
+      --error:     #e74c3c;
+      --text:      #1a1a2e;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --white:     #ffffff;
+      --radius:    12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      line-height: 1.7;
+      background: var(--white);
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--primary);
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+    }
+    .nav-brand {
+      color: var(--white);
+      font-size: 20px; font-weight: 800;
+      text-decoration: none; letter-spacing: -.3px;
+    }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-links a {
+      color: rgba(255,255,255,.8);
+      text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: background .15s, color .15s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,.12); color: var(--white); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #2d4a8a 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 80px 24px 100px;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 13px; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: .3px;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 6vw, 52px);
+      font-weight: 800; line-height: 1.2;
+      margin-bottom: 18px;
+    }
+    .hero h1 span { color: #7dd3fc; }
+    .hero p {
+      font-size: clamp(16px, 2.5vw, 20px);
+      opacity: .85; max-width: 580px; margin: 0 auto 36px;
+    }
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 26px; border-radius: 8px;
+      font-size: 15px; font-weight: 600;
+      text-decoration: none; transition: transform .15s, box-shadow .15s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+    .btn-white { background: var(--white); color: var(--primary); }
+    .btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,.6); }
+
+    /* ── SECTION ── */
+    section { padding: 72px 24px; }
+    .container { max-width: 860px; margin: 0 auto; }
+    .section-label {
+      font-size: 12px; font-weight: 700; letter-spacing: 1.2px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 800; line-height: 1.25;
+      color: var(--primary); margin-bottom: 14px;
+    }
+    .section-sub {
+      font-size: 16px; color: var(--muted);
+      max-width: 560px; margin-bottom: 48px;
+    }
+
+    /* ── FEATURES ── */
+    #ozellikler { background: var(--light); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    }
+    .feature-icon {
+      width: 44px; height: 44px;
+      background: var(--light);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 14px;
+    }
+    .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--primary); }
+    .feature-card p  { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── LEGAL SECTION ── */
+    .legal-nav {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .tab-btn {
+      padding: 9px 20px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: var(--white);
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all .15s;
+      color: var(--muted);
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--white);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── PROSE (policy text) ── */
+    .prose { font-size: 15px; color: #334155; }
+    .prose h2 {
+      font-size: 18px; font-weight: 700;
+      color: var(--primary);
+      margin: 32px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--light);
+    }
+    .prose h3 { font-size: 15px; font-weight: 700; margin: 20px 0 8px; }
+    .prose p  { margin-bottom: 12px; }
+    .prose ul, .prose ol { padding-left: 20px; margin-bottom: 14px; }
+    .prose li { margin-bottom: 5px; }
+    .prose strong { color: var(--primary); }
+    .prose table {
+      width: 100%; border-collapse: collapse;
+      margin: 16px 0; font-size: 14px;
+    }
+    .prose th {
+      background: var(--primary); color: var(--white);
+      padding: 10px 14px; text-align: left; font-size: 13px;
+    }
+    .prose td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+    .prose tr:nth-child(even) td { background: #f8fafc; }
+    .prose .updated {
+      display: inline-block;
+      background: var(--light);
+      color: var(--accent);
+      font-size: 13px; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px;
+      margin-bottom: 24px;
+    }
+    .prose a { color: var(--accent); }
+
+    /* ── DATA DELETION ── */
+    .deletion-steps { margin: 24px 0; }
+    .step {
+      display: flex; gap: 16px; align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .step-num {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: var(--primary); color: var(--white);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+    }
+    .step-body { flex: 1; padding-top: 5px; font-size: 15px; }
+    .warning-box {
+      background: #fef9c3;
+      border-left: 4px solid #eab308;
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-size: 14px; color: #713f12;
+      margin-top: 20px;
+    }
+    .deleted-items li { color: var(--error); }
+    .kept-items   li { color: var(--success); }
+    .mail-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--primary); color: var(--white);
+      text-decoration: none;
+      padding: 11px 22px; border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      margin-top: 14px; transition: opacity .15s;
+    }
+    .mail-btn:hover { opacity: .85; }
+
+    /* ── CONTACT ── */
+    #iletisim { background: var(--primary); color: var(--white); text-align: center; }
+    #iletisim .section-title { color: var(--white); }
+    #iletisim .section-sub   { color: rgba(255,255,255,.7); margin-left: auto; margin-right: auto; }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px; margin-top: 40px;
+    }
+    .contact-card {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: var(--radius);
+      padding: 24px 20px; text-align: center;
+    }
+    .contact-card .ico { font-size: 28px; margin-bottom: 10px; }
+    .contact-card h3 { font-size: 14px; font-weight: 700; opacity: .75; margin-bottom: 6px; }
+    .contact-card a { color: #7dd3fc; font-size: 15px; font-weight: 600; text-decoration: none; }
+    .contact-card a:hover { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0f172a;
+      color: rgba(255,255,255,.5);
+      text-align: center;
+      padding: 28px 24px;
+      font-size: 13px;
+    }
+    footer a { color: rgba(255,255,255,.6); text-decoration: none; }
+    footer a:hover { color: var(--white); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      nav { padding: 0 16px; }
+      .nav-links a { padding: 6px 8px; font-size: 13px; }
+      section { padding: 56px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#anasayfa">MolaTakip</a>
+  <div class="nav-links">
+    <a href="#ozellikler">Özellikler</a>
+    <a href="#gizlilik">Gizlilik</a>
+    <a href="#hesap-sil">Hesap Sil</a>
+    <a href="#iletisim">İletişim</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="anasayfa" class="hero">
+  <div class="hero-badge">Perakende Mağazaları İçin</div>
+  <h1>Mola Yönetimini<br/><span>Dijitalleştirin</span></h1>
+  <p>MolaTakip ile çalışan molalarını planlayın, takip edin ve analiz edin — tüm ekip, tek uygulama.</p>
+  <div class="hero-btns">
+    <a class="btn btn-white" href="#ozellikler">Özelliklere Bak</a>
+    <a class="btn btn-outline" href="#iletisim">İletişime Geç</a>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="ozellikler">
+  <div class="container">
+    <div class="section-label">Neler Yapabilirsiniz</div>
+    <h2 class="section-title">Mağazanızı Daha İyi Yönetin</h2>
+    <p class="section-sub">Kağıt, mesaj ya da sözlü iletişime gerek kalmadan — molalar planlı, çalışanlar bilgili.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h3>Mola Planlama</h3>
+        <p>Çalışanlarınıza mola saatleri atayın, çakışmaları önleyin, programı düzenleyin.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔔</div>
+        <h3>Anlık Bildirimler</h3>
+        <p>Mola başlamadan önce çalışan otomatik bildirim alır, mola kaçırma sorununa son.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Analitik Raporlar</h3>
+        <p>Son 7 veya 30 günlük mola istatistikleri, kaçırılan molalar ve çalışan bazlı raporlar.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <h3>Ekip Yönetimi</h3>
+        <p>Sahip, yönetici, yardımcı yönetici ve çalışan rolleriyle tam yetki kontrolü.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h3>Mola Takası</h3>
+        <p>Çalışanlar mola takas talebi oluşturabilir, yönetici onaylar veya reddeder.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Güvenli Altyapı</h3>
+        <p>Google Firebase üzerinde çalışır; verileriniz şifreli, KVKK uyumlu şekilde saklanır.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEGAL -->
+<section id="gizlilik">
+  <div class="container">
+    <div class="section-label">Yasal Belgeler</div>
+    <h2 class="section-title">Gizlilik & Kullanım Koşulları</h2>
+    <div class="legal-nav">
+      <button class="tab-btn active" onclick="showTab('privacy')">Gizlilik Politikası</button>
+      <button class="tab-btn"        onclick="showTab('terms')">Kullanım Koşulları</button>
+    </div>
+
+    <!-- PRIVACY POLICY -->
+    <div id="tab-privacy" class="tab-content active">
+      <div class="prose">
+        <span class="updated">Son Güncelleme: 12 Nisan 2026</span>
+
+        <h2>1. Giriş</h2>
+        <p>Mola Takip uygulaması ("Uygulama", "Hizmet"), perakende mağazalarında çalışanların mola sürelerini yönetmek amacıyla geliştirilmiştir. Bu Gizlilik Politikası, Uygulama aracılığıyla topladığımız kişisel verileri, bu verileri nasıl kullandığımızı, sakladığımızı ve koruduğumuzu açıklamaktadır.</p>
+        <p>Uygulamayı kullanarak bu Gizlilik Politikasını kabul etmiş sayılırsınız.</p>
+
+        <h2>2. Topladığımız Veriler</h2>
+        <h3>2.1 Hesap Bilgileri</h3>
+        <ul>
+          <li><strong>E-posta adresi:</strong> Kimlik doğrulama amacıyla</li>
+          <li><strong>Görünen ad:</strong> Uygulama içi profil ve üye listeleri için</li>
+          <li><strong>Telefon numarası:</strong> İsteğe bağlı, kullanıcı tarafından girilirse saklanır</li>
+        </ul>
+        <h3>2.2 Mağaza ve İş Verileri</h3>
+        <ul>
+          <li><strong>Mağaza adı ve katılım kodu:</strong> Mağaza yönetimi için</li>
+          <li><strong>Kullanıcı rolü:</strong> Mağaza içindeki yetki seviyesi</li>
+          <li><strong>Mola kayıtları:</strong> Atanan mola zamanları, süreleri, durumu ve notlar</li>
+        </ul>
+        <h3>2.3 Cihaz ve Teknik Veriler</h3>
+        <ul>
+          <li><strong>FCM Token:</strong> Push bildirim gönderimi için</li>
+          <li><strong>Uygulama kullanım günlükleri:</strong> Hata tespiti (anonim)</li>
+        </ul>
+        <h3>2.4 Toplamadığımız Veriler</h3>
+        <ul>
+          <li>Konum verisi</li>
+          <li>Rehber veya fotoğraf galerisine erişim</li>
+          <li>Biyometrik veri</li>
+          <li>Reklam tanımlayıcıları</li>
+        </ul>
+
+        <h2>3. Verilerin Kullanım Amaçları</h2>
+        <table>
+          <tr><th>Amaç</th><th>Kullanılan Veri</th></tr>
+          <tr><td>Kimlik doğrulama</td><td>E-posta, görünen ad</td></tr>
+          <tr><td>Mola atama ve takip</td><td>Kullanıcı ID, mola kayıtları</td></tr>
+          <tr><td>Push bildirimleri</td><td>FCM token</td></tr>
+          <tr><td>Üye listesi görüntüleme</td><td>Görünen ad, e-posta, rol</td></tr>
+          <tr><td>Hata ayıklama</td><td>Anonim günlükler</td></tr>
+        </table>
+        <p>Verileriniz <strong>üçüncü taraf reklam şirketleriyle paylaşılmaz</strong>, satılmaz veya pazarlama amacıyla kullanılmaz.</p>
+
+        <h2>4. Verilerin Saklanması ve Korunması</h2>
+        <p>Tüm veriler <strong>Google Firebase</strong> altyapısında saklanmaktadır (Authentication, Cloud Firestore, Cloud Messaging). Firebase, SOC 2 Type II ve ISO 27001 uyumluluğuna sahiptir. Firestore güvenlik kuralları her kullanıcının yalnızca kendi mağazasının verilerine erişmesini sağlar.</p>
+
+        <h2>5. Veri Paylaşımı</h2>
+        <p>Kişisel verilerinizi yalnızca şu durumlarda paylaşıyoruz:</p>
+        <ul>
+          <li><strong>Google Firebase:</strong> Altyapı hizmet sağlayıcısı</li>
+          <li><strong>Yasal zorunluluk:</strong> Mahkeme kararı veya yetkili makam talebi</li>
+          <li><strong>Güvenlik:</strong> Hizmetlerimizi veya kullanıcıları korumak için gerekli haller</li>
+        </ul>
+
+        <h2>6. Veri Saklama Süresi</h2>
+        <table>
+          <tr><th>Veri Türü</th><th>Saklama Süresi</th></tr>
+          <tr><td>Kullanıcı hesabı</td><td>Hesap silinene kadar</td></tr>
+          <tr><td>Mola kayıtları</td><td>Hesap silinene kadar</td></tr>
+          <tr><td>FCM token</td><td>Hesap silinene kadar</td></tr>
+          <tr><td>Anonim günlükler</td><td>30 gün</td></tr>
+        </table>
+
+        <h2>7. Kullanıcı Hakları</h2>
+        <ul>
+          <li><strong>Erişim hakkı:</strong> Hakkınızda sakladığımız verilere erişim talep edebilirsiniz</li>
+          <li><strong>Düzeltme hakkı:</strong> Yanlış verilerin düzeltilmesini isteyebilirsiniz</li>
+          <li><strong>Silme hakkı:</strong> Uygulama → Profil → Hesabı Sil adımlarıyla verilerinizi silebilirsiniz</li>
+          <li><strong>İtiraz hakkı:</strong> Belirli veri işleme faaliyetlerine itiraz edebilirsiniz</li>
+        </ul>
+
+        <h2>8. Çocukların Gizliliği</h2>
+        <p>Uygulama <strong>13 yaşın altındaki bireylere</strong> yönelik değildir ve bu yaş grubundan bilerek veri toplamıyoruz.</p>
+
+        <h2>9. Üçüncü Taraf Hizmetleri</h2>
+        <table>
+          <tr><th>Hizmet</th><th>Amaç</th></tr>
+          <tr><td>Google Firebase</td><td>Kimlik doğrulama, veritabanı, bildirimler</td></tr>
+          <tr><td>Google Play</td><td>Android dağıtım</td></tr>
+          <tr><td>Apple App Store</td><td>iOS dağıtım</td></tr>
+        </table>
+
+        <h2>10. Çerezler ve Takip</h2>
+        <p>Uygulama çerez kullanmaz. Analitik amaçlı herhangi bir kullanıcı takibi gerçekleştirilmez.</p>
+
+        <h2>11. Politika Değişiklikleri</h2>
+        <p>Bu politikayı güncelleyebiliriz. Önemli değişiklikler uygulama içi bildirim veya e-posta ile duyurulacaktır.</p>
+
+        <h2>12. Uygulanacak Hukuk</h2>
+        <p>Bu politika <strong>Türk hukuku</strong> ve <strong>6698 Sayılı KVKK</strong> kapsamında düzenlenmektedir. AB'de ikamet eden kullanıcılar için <strong>GDPR</strong> hükümleri de geçerlidir.</p>
+
+        <h2>13. İletişim</h2>
+        <p>Sorularınız için: <a href="mailto:bunyaminguneypinar@gmail.com">bunyaminguneypinar@gmail.com</a></p>
+      </div>
+    </div>
+
+    <!-- TERMS OF SERVICE -->
+    <div id="tab-terms" class="tab-content">
+      <div class="prose">
+        <span class="updated">Son Güncelleme: 12 Nisan 2026</span>
+
+        <h2>1. Taraflar ve Kabul</h2>
+        <p>Bu Kullanım Koşulları, Mola Takip uygulamasını kullanan bireyler ve işletmeler ("Kullanıcı") ile uygulama geliştiricisi ("Geliştirici") arasında geçerlidir. Uygulamayı indirerek veya kullanarak bu Koşulları kabul etmiş sayılırsınız. <strong>Kabul etmiyorsanız uygulamayı kullanmayınız.</strong></p>
+
+        <h2>2. Hizmetin Tanımı</h2>
+        <p>Mola Takip, perakende mağazalarında çalışan mola sürelerini planlamaya, takip etmeye ve push bildirimler aracılığıyla hatırlatmalar göndermeye yarayan bir mobil uygulamadır.</p>
+
+        <h2>3. Hesap Oluşturma ve Güvenlik</h2>
+        <ul>
+          <li>Geçerli bir e-posta adresi zorunludur</li>
+          <li>13 yaşından büyük olmalısınız</li>
+          <li>Hesap bilgilerinizin gizliliğinden siz sorumlusunuz</li>
+          <li>Mağaza katılım kodları yalnızca gerçek çalışanlar arasında paylaşılabilir</li>
+        </ul>
+
+        <h2>4. Kullanıcı Rolleri</h2>
+        <table>
+          <tr><th>Rol</th><th>Sorumluluklar</th></tr>
+          <tr><td><strong>Sahip</strong></td><td>Mağazanın tüm yönetimi; mola politikalarının yasalara uygunluğu</td></tr>
+          <tr><td><strong>Yönetici</strong></td><td>Atadığı molaların iş mevzuatına uygunluğu</td></tr>
+          <tr><td><strong>Yardımcı Yönetici</strong></td><td>Yönetici talimatları dahilinde mola atar</td></tr>
+          <tr><td><strong>Çalışan</strong></td><td>Atanan molalara uyar; yalnızca kendi verilerini görür</td></tr>
+        </table>
+
+        <h2>5. Yasaklanan Kullanımlar</h2>
+        <ul>
+          <li>Uygulamayı tersine mühendislik veya kopyalama</li>
+          <li>Başka kullanıcıların verilerine yetkisiz erişim girişimi</li>
+          <li>İş mevzuatını ihlal eden mola atamaları</li>
+          <li>Yanlış veya yanıltıcı bilgi girişi</li>
+          <li>Otomatik bot veya script kullanımı</li>
+          <li>Sunuculara aşırı yük bindirme</li>
+        </ul>
+
+        <h2>6. Fikri Mülkiyet</h2>
+        <p>Uygulama, tasarım, kod ve içerikler dahil tüm hakları Geliştirici'ye aittir. Kullanıcıya yalnızca kişisel ve ticari kullanım amacıyla sınırlı, devredilemez lisans verilmektedir.</p>
+
+        <h2>7. Veri Sahipliği</h2>
+        <p>Mola kayıtları ve profil bilgileri kullanıcıya aittir. Geliştirici, kullanıcı verilerini Gizlilik Politikası dışında kullanmaz. Hesap silindiğinde veriler kalıcı olarak silinir.</p>
+
+        <h2>8. Sorumluluk Reddi</h2>
+        <p>Uygulama <strong>"olduğu gibi"</strong> sağlanmaktadır. Geliştirici kesintisiz hizmet veya belirli bir amaca uygunluk garanti etmez.</p>
+
+        <h2>9. İş Mevzuatı Uyarısı</h2>
+        <p>Mola Takip, iş mevzuatı danışmanlığı sağlamaz. Mağaza sahipleri ve yöneticileri <strong>4857 Sayılı İş Kanunu</strong> hükümlerine bizzat uymakla yükümlüdür.</p>
+
+        <h2>10. Uyuşmazlık Çözümü</h2>
+        <p>Uyuşmazlıklar önce karşılıklı müzakere ile çözülür; aksi halde <strong>İstanbul Mahkemeleri</strong> yetkilidir. Uygulanacak hukuk Türk Hukukudur.</p>
+
+        <h2>11. Koşulların Değiştirilmesi</h2>
+        <p>Koşulları güncelleme hakkımız saklıdır. Önemli değişiklikler en az 15 gün öncesinden bildirilir.</p>
+
+        <h2>12. Apple App Store EULA</h2>
+        <p>Bu uygulama Apple App Store aracılığıyla dağıtılmaktadır. Apple varsayılan EULA koşulları geçerlidir. Apple bu Koşullara taraf değildir; her türlü talep yalnızca Geliştirici'ye yöneltilmelidir.</p>
+
+        <h2>13. İletişim</h2>
+        <p>Sorularınız için: <a href="mailto:bunyaminguneypinar@gmail.com">bunyaminguneypinar@gmail.com</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA DELETION -->
+<section id="hesap-sil" style="background:#f8fafc;">
+  <div class="container">
+    <div class="section-label">Veri Silme</div>
+    <h2 class="section-title">Hesap & Veri Silme</h2>
+    <p class="section-sub">Google Play ve App Store gereksinimi kapsamında hesabınızı ve tüm verilerinizi silebilirsiniz.</p>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--primary);margin-bottom:16px;">Uygulama İçinden Silme</h3>
+    <div class="deletion-steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">MolaTakip uygulamasını açın ve hesabınıza giriş yapın.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">Alt menüden <strong>Profil</strong> sekmesine gidin.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body"><strong>Ayarlar → Hesap İşlemleri</strong> bölümüne inin.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body"><strong>Hesabı Sil</strong> seçeneğine dokunun.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">Onay kutusunu kabul edin, şifrenizi girerek işlemi tamamlayın.</div>
+      </div>
+    </div>
+
+    <div class="warning-box">⚠️ Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinir.</div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:32px;">
+      <div>
+        <h3 style="font-size:15px;font-weight:700;color:#c0392b;margin-bottom:10px;">Silinen Veriler</h3>
+        <ul class="deleted-items" style="padding-left:18px;font-size:15px;">
+          <li>Firebase Auth hesabı (e-posta, şifre)</li>
+          <li>Profil bilgileri</li>
+          <li>Mağaza üyeliği ve rol kaydı</li>
+          <li>FCM bildirim token'ları</li>
+          <li>Tüm mola kayıtları</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:15px;font-weight:700;color:var(--success);margin-bottom:10px;">Geçici Saklanan</h3>
+        <ul class="kept-items" style="padding-left:18px;font-size:15px;">
+          <li>Anonim istatistik özetleri → 30 gün</li>
+          <li>Yasal yükümlülük log verileri → 90 gün</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;padding:24px;background:var(--white);border-radius:var(--radius);border:1px solid var(--border);">
+      <h3 style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:8px;">Uygulamaya Erişemiyorum</h3>
+      <p style="font-size:15px;color:var(--muted);margin-bottom:4px;">Talebiniz <strong>5 iş günü</strong> içinde işleme alınır.</p>
+      <a class="mail-btn" href="mailto:bunyaminguneypinar@gmail.com?subject=Hesap%20Silme%20Talebi&body=Silinmesini%20istedi%C4%9Fim%20e-posta%20adresi%3A%20">
+        ✉️ E-posta Gönder
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="iletisim">
+  <div class="container">
+    <div class="section-label" style="color:#7dd3fc;">Bize Ulaşın</div>
+    <h2 class="section-title">İletişim</h2>
+    <p class="section-sub">Uygulama hakkında sorularınız, iş birliği teklifleriniz veya destek talepleriniz için.</p>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="ico">✉️</div>
+        <h3>E-POSTA</h3>
+        <a href="mailto:bunyaminguneypinar@gmail.com">bunyaminguneypinar@gmail.com</a>
+      </div>
+      <div class="contact-card">
+        <div class="ico">🛡️</div>
+        <h3>GİZLİLİK TALEPLERİ</h3>
+        <a href="mailto:bunyaminguneypinar@gmail.com?subject=KVKK%20Talebi">KVKK / GDPR Talebi</a>
+      </div>
+      <div class="contact-card">
+        <div class="ico">🗑️</div>
+        <h3>VERİ SİLME</h3>
+        <a href="#hesap-sil">Hesap Silme Talebi</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    &copy; 2026 MolaTakip &mdash;
+    <a href="#gizlilik">Gizlilik Politikası</a> &middot;
+    <a href="#gizlilik" onclick="showTab('terms');return false;">Kullanım Koşulları</a> &middot;
+    <a href="#hesap-sil">Hesap Sil</a>
+  </p>
+  <p style="margin-top:6px;font-size:12px;opacity:.6;">KVKK &amp; GDPR uyumlu &middot; Google Firebase altyapısı</p>
+</footer>
+
+<script>
+  function showTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', (i === 0 && name === 'privacy') || (i === 1 && name === 'terms'));
+    });
+    document.getElementById('tab-privacy').classList.toggle('active', name === 'privacy');
+    document.getElementById('tab-terms').classList.toggle('active',   name === 'terms');
+    document.getElementById('gizlilik').scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
